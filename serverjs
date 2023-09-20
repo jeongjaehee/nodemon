@@ -1,0 +1,75 @@
+const express = require("express");
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+const MongoClient = require("mongodb").MongoClient;
+app.set("view engine", "ejs");
+
+// MongoClient.connect("아까 챙겨온 접속URL", function (에러, client) {
+//   if (에러) return console.log(에러);
+//   //서버띄우는 코드 여기로 옮기기
+//   app.listen("8080", function () {
+//     console.log("listening on 8080");
+//   });
+// });
+var db;
+// var db 변수 하나 필요 그아래는 db에 저장하는방식
+MongoClient.connect(
+  "mongodb+srv://admin:qw1313qw@cluster0.v29dqnb.mongodb.net/?retryWrites=true&w=majority",
+  function (에러, client) {
+    if (에러) {
+      return console.log(에러);
+    }
+
+    db = client.db("todoapp");
+    // todoapp 이라는 database(폴더)에 연결좀요 db에다 함수 붙이고 하면서 연결한데
+
+    // db.collection('post').insertOne('저장할 데이터 object 자료형',function(에러,결과){
+    //   console.log('저장완료')
+    // }) 요런식으로 저장함
+
+    // db.collection("post").insertOne(
+    //   { 제목: "마파", 날짜: "두부냥ㄴ" },
+    //   function (에러, 결과) {
+    //     console.log("저장완료");
+    //   }
+    // );
+    // 오브젝트 자료형이 저장이되면 ~라고 실행해줘
+    app.listen(8080, function () {
+      console.log("listening on 8080");
+    });
+  }
+);
+// function (에러, client) { 여기서 에러는 에러가 발생했을시 알려주는 구멍이다.
+// 8080 port로 웹서버를 열고 잘 열리면 출력하세요
+
+// 누군가가 /pet 으로 방문을 하면 pet 관련 안내물을 띄어주자
+// app.get("/pet", +function (요청, 응답) 요게 콜백함수 함수안에 함수 즉 get 도 함수임~!!+  { .get('경로')
+//   응답.send("펫용품 쇼핑할 수 있는 페이지입니다");
+// 즉 순차적으로 진행하고 싶을때 함수안에 함수(function(){}) 많이 씀
+// });
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/index.html");
+});
+//   이렇게 여러번 번복해서 만들 수 있다.
+app.get("/write", function (req, res) {
+  res.sendFile(__dirname + "/write.html");
+});
+
+app.post("/add", function (req, res) {
+  res.send("전송완료");
+  console.log(req.body.title);
+  db.collection("post").insertOne(
+    { 제목: req.body.title, 날짜: req.body.date },
+    function () {
+      console.log("저장완료");
+    }
+  );
+  // DB에 저장해주세요 하려면 rest api 배워야함
+});
+// req에 요청에 받은 정보가 있다 그걸 받아서 사용하려면 데이터 전송하려면 body-parser 필요 그리고 input name ="쓰기 서버는 input구분못해서 name필요"
+
+// 어떤 사람이 /add라는 경로로 post 요청을 하면, 데이터 2개(날짜, 제목)을 보여주는데, 이때, 'post'라는 이름을 가진 collection에 두개 데이터 저장하기
+//{제목:'어쩌구',날짜:'어쩌구'} 형식으로
+
+//  /list로 get요청해서 접속하면
+// 실제 db에 저장된 예쁘게 꾸며진 html (데이터들을) 보여주기
